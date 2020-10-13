@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using LoggingAPI.Models;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace LoggingAPI.Controllers
 {
@@ -51,6 +54,21 @@ namespace LoggingAPI.Controllers
 
             }
            
+        }
+        [HttpPost]
+        [Route("user")]
+        public void LogUserIdentity(TokenModel tokenModel)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(tokenModel.token);
+
+            var claims = int.Parse(jwtToken.Claims.FirstOrDefault(x => x.Type == "id").Value);
+
+            Log(new LogModel
+            {
+                logSeverity = LogLevel.Trace,
+                message = JsonConvert.SerializeObject(claims)
+            });             
         }
         
     }
