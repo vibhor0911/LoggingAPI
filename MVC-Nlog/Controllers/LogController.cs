@@ -61,14 +61,27 @@ namespace LoggingAPI.Controllers
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtToken = tokenHandler.ReadJwtToken(tokenModel.token);
+            var idTokens = jwtToken.Claims?.FirstOrDefault(x => x.Type == "id");
 
-            var claims = int.Parse(jwtToken.Claims.FirstOrDefault(x => x.Type == "id").Value);
-
-            Log(new LogModel
+            if (idTokens != null)
             {
-                logSeverity = LogLevel.Trace,
-                message = JsonConvert.SerializeObject(claims)
-            });             
+                Log(new LogModel
+                {
+                    logSeverity = LogLevel.Trace,
+                    message = JsonConvert.SerializeObject(new { idTokens.Value, idTokens.Type })
+                });
+            }
+            else
+            {
+                var claims = jwtToken.Claims?.Select(c => new { c.Value, c.Type }).ToList();
+                     Log(new LogModel
+                     {
+                         logSeverity = LogLevel.Trace,
+                         message = JsonConvert.SerializeObject(claims)
+                     });
+            }
+              
+                       
         }
         
     }
